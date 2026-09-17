@@ -17,11 +17,13 @@
     --col-done:   #2e5c3e;
     --col-plain:  #d1973c;
     --col-next:   #345843;
+    --left-col-width: 58%;
+    --timer-scale: 110px;
   }
   *, *::before, *::after { box-sizing: border-box; }
   
   body {
-    margin: 0; padding: 14px 18px;
+    margin: 0; padding: 12px 16px;
     background: url('https://wallpapers-clan.com/wp-content/uploads/2024/07/studio-ghibli-totoro-forest-desktop-wallpaper-preview.jpg') no-repeat center center fixed;
     background-size: cover;
     color: var(--text);
@@ -35,11 +37,11 @@
 
   .wrap {
     width: 100%;
-    max-width: 1600px;
+    max-width: 1680px;
     height: 96vh;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
   header {
@@ -48,21 +50,64 @@
     align-items: center;
     padding: 0 4px;
   }
-  h1 { font-size: 1.35rem; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
-  .sub { color: var(--muted); font-size: .8rem; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
+  h1 { font-size: 1.3rem; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
+  .header-tools { display: flex; align-items: center; gap: 14px; }
+  .scale-ctrl { display: flex; align-items: center; gap: 6px; font-size: .76rem; color: var(--muted); }
+  .scale-ctrl input { width: 90px; accent-color: var(--col-rest); }
+  .sub { color: var(--muted); font-size: .78rem; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
 
-  /* ── Split Layout: 60% Left Media, 40% Right Timer/Playlist ── */
+  /* ── Adjustable Split Layout ── */
   .layout-grid {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 16px;
+    display: flex;
     flex: 1;
+    min-height: 0;
+    gap: 0;
+    position: relative;
+    user-select: none;
+  }
+
+  /* ── Left Column: Media Suite ── */
+  .left-col {
+    width: var(--left-col-width);
+    min-width: 320px;
+    max-width: 80%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     min-height: 0;
   }
 
-  .left-col {
+  /* ── Draggable Splitter Divider ── */
+  .resizer-bar {
+    width: 12px;
+    cursor: col-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+    z-index: 10;
+    transition: background .2s;
+  }
+  .resizer-bar::after {
+    content: '';
+    width: 4px;
+    height: 60px;
+    background: var(--glass-border);
+    border-radius: 4px;
+    transition: background .2s, height .2s;
+  }
+  .resizer-bar:hover::after, .resizer-bar.dragging::after {
+    background: var(--col-rest);
+    height: 100px;
+  }
+
+  /* ── Right Column: Timer & Routine ── */
+  .right-col {
+    flex: 1;
+    min-width: 320px;
     display: flex;
     flex-direction: column;
+    gap: 10px;
     height: 100%;
     min-height: 0;
   }
@@ -70,14 +115,14 @@
   .media-panel {
     background: var(--glass-card);
     border: 1.5px solid var(--glass-border);
-    border-radius: 22px;
-    padding: 14px 16px;
+    border-radius: 20px;
+    padding: 12px 14px;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 16px 40px rgba(0,0,0,0.4);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     height: 100%;
     min-height: 0;
   }
@@ -86,16 +131,16 @@
     display: flex;
     gap: 8px;
     border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 8px;
+    padding-bottom: 6px;
   }
   .tab-btn {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--glass-border-light);
     color: var(--muted);
-    padding: 6px 14px;
-    border-radius: 9px;
+    padding: 5px 12px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: .82rem;
+    font-size: .8rem;
     font-weight: 600;
   }
   .tab-btn.active {
@@ -107,7 +152,7 @@
   .tab-content {
     display: none;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     flex: 1;
     min-height: 0;
   }
@@ -127,21 +172,22 @@
   .btn-action {
     background: var(--col-rest);
     border-radius: 9px;
-    padding: 8px 16px;
-    font-size: .84rem;
+    padding: 8px 15px;
+    font-size: .82rem;
     border: none;
     color: #fff;
     font-weight: 700;
     cursor: pointer;
+    white-space: nowrap;
   }
 
   .video-viewport {
-    flex: 1;
-    min-height: 0;
+    flex: 1.2;
+    min-height: 160px;
     position: relative;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.65);
+    background: rgba(0, 0, 0, 0.7);
     border: 1.5px solid var(--glass-border);
   }
   .video-viewport iframe, .video-viewport video {
@@ -150,9 +196,42 @@
     width: 100%;
     height: 100%;
     border: none;
-    object-fit: cover;
   }
 
+  /* ── YouTube Search Grid (Mini YouTube App) ── */
+  .yt-results-drawer {
+    flex: 1;
+    min-height: 120px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px;
+  }
+  .yt-results-drawer::-webkit-scrollbar { width: 5px; }
+  .yt-results-drawer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  .yt-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border-light);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .15s, background .15s;
+    display: flex;
+    flex-direction: column;
+  }
+  .yt-card:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-2px); }
+  .yt-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #000; }
+  .yt-card-info { padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .yt-card-title { font-size: .72rem; font-weight: 700; color: #fff; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .yt-card-sub { font-size: .65rem; color: var(--muted); }
+
+  /* ── Soundscape Cards ── */
   .sound-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -162,39 +241,37 @@
   .sound-card {
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid var(--glass-border);
-    border-radius: 11px;
-    padding: 14px;
+    border-radius: 10px;
+    padding: 12px;
     text-align: center;
     cursor: pointer;
     transition: background .2s, border-color .2s;
   }
   .sound-card:hover { background: rgba(255, 255, 255, 0.15); }
   .sound-card.active { background: var(--col-rest); border-color: #8edaa5; }
-  .sound-card span { display: block; font-size: 1.4rem; margin-bottom: 4px; }
-  .sound-card small { font-size: .78rem; font-weight: 600; }
+  .sound-card span { display: block; font-size: 1.3rem; margin-bottom: 2px; }
+  .sound-card small { font-size: .76rem; font-weight: 600; }
 
-  /* ── Right Column: Timer & Playlist ── */
-  .right-col {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    height: 100%;
-    min-height: 0;
-  }
-
+  /* ── Right Stage: Timer ── */
   .stage {
     background: var(--glass-card);
     border: 1.5px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 12px 16px;
+    border-radius: 18px;
+    padding: 10px 14px;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 16px 40px rgba(0,0,0,0.35);
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 14px;
   }
-  .circle-wrap { position: relative; width: 105px; height: 105px; flex-shrink: 0; }
+  .circle-wrap {
+    position: relative;
+    width: var(--timer-scale);
+    height: var(--timer-scale);
+    flex-shrink: 0;
+    transition: width .15s, height .15s;
+  }
   .circle-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
   circle.bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 12; }
   circle.fg { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke .3s; }
@@ -202,18 +279,18 @@
     position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
-  .bignum { font-size: 1.85rem; font-weight: 900; line-height: 1; }
+  .bignum { font-size: 1.8rem; font-weight: 900; line-height: 1; }
 
   .stage-info { flex: 1; min-width: 0; }
-  .ex-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ex-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ex-phase {
-    font-size: .72rem; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--muted); margin-bottom: 8px;
+    font-size: .7rem; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted); margin-bottom: 6px;
   }
-  .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn-row { display: flex; gap: 5px; flex-wrap: wrap; }
   button.ctrl {
-    border: 1px solid var(--glass-border-light); border-radius: 9px; padding: 7px 11px;
-    font-size: .78rem; font-weight: 700; cursor: pointer;
+    border: 1px solid var(--glass-border-light); border-radius: 8px; padding: 6px 10px;
+    font-size: .76rem; font-weight: 700; cursor: pointer;
     background: rgba(255,255,255,0.12); color: var(--text);
   }
   button.ctrl:hover { background: rgba(255,255,255,0.22); }
@@ -222,14 +299,14 @@
   button.ctrl.pause-all { background: #b8600a; border-color: #f7a261; }
   button:disabled { opacity: .35; cursor: not-allowed; }
 
-  /* Playlist */
+  /* ── Playlist Panel ── */
   .playlist-panel {
     flex: 1;
     min-height: 0;
     background: var(--glass-card);
     border: 1.5px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 12px 16px;
+    border-radius: 18px;
+    padding: 10px 14px;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 16px 40px rgba(0,0,0,0.35);
@@ -240,18 +317,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
     border-bottom: 1px solid var(--glass-border);
   }
   .playlist-header span {
-    font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+    font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
   }
   .playlist-container {
     overflow-y: auto;
     flex: 1;
     padding-right: 4px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .playlist-container::-webkit-scrollbar { width: 5px; }
   .playlist-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
@@ -260,46 +337,45 @@
   li.ex-item {
     background: rgba(255,255,255,0.06);
     border: 1px solid var(--glass-border);
-    border-radius: 11px;
+    border-radius: 10px;
     overflow: hidden;
     backdrop-filter: blur(8px);
-    transition: background .2s, border-color .2s;
   }
   li.ex-item:hover { background: rgba(255,255,255,0.1); }
-  li.ex-item.active-ex { border-color: #f7a261; box-shadow: 0 0 12px rgba(224, 138, 60, 0.35); background: rgba(46, 75, 58, 0.7); }
+  li.ex-item.active-ex { border-color: #f7a261; box-shadow: 0 0 10px rgba(224, 138, 60, 0.35); background: rgba(46, 75, 58, 0.7); }
   
   .ex-header {
-    display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; user-select: none;
+    display: flex; align-items: center; gap: 8px; padding: 7px 9px; cursor: pointer; user-select: none;
   }
-  .handle { cursor: grab; color: var(--muted); font-size: 1rem; }
+  .handle { cursor: grab; color: var(--muted); font-size: .95rem; }
   .ex-check { accent-color: var(--col-rest); width: 14px; height: 14px; cursor: pointer; }
   .ex-label { flex: 1; min-width: 0; }
-  .ex-label-name { font-weight: 700; font-size: .86rem; }
-  .ex-label-meta { font-size: .7rem; color: var(--muted); }
-  .chevron { color: var(--muted); font-size: .8rem; transition: transform .2s; }
+  .ex-label-name { font-weight: 700; font-size: .84rem; }
+  .ex-label-meta { font-size: .68rem; color: var(--muted); }
+  .chevron { color: var(--muted); font-size: .78rem; transition: transform .2s; }
   .chevron.open { transform: rotate(90deg); }
   
-  .ex-body { display: none; padding: 8px 10px 10px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15); }
+  .ex-body { display: none; padding: 6px 9px 8px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15); }
   .ex-body.open { display: block; }
-  .field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px,1fr)); gap: 8px; }
-  .field { display: flex; flex-direction: column; gap: 3px; }
-  .field label { font-size: .65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+  .field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px,1fr)); gap: 6px; }
+  .field { display: flex; flex-direction: column; gap: 2px; }
+  .field label { font-size: .62rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
   .f-inp {
     background: rgba(255, 255, 255, 0.08); border: 1px solid var(--glass-border); border-radius: 6px;
-    padding: 5px 6px; font-size: .8rem; color: #fff; width: 100%;
+    padding: 4px 6px; font-size: .76rem; color: #fff; width: 100%;
   }
   .f-inp option { background: #1b2e23; color: #fff; }
-  .time-row { display: flex; gap: 4px; align-items: center; }
-  .time-row .f-inp { width: 50px; }
-  .ex-actions { margin-top: 8px; display: flex; }
-  .btn-delete { background: rgba(180, 40, 40, 0.4); color: #fff; border-radius: 6px; padding: 4px 8px; font-size: .72rem; margin-left: auto; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
+  .time-row { display: flex; gap: 3px; align-items: center; }
+  .time-row .f-inp { width: 44px; }
+  .ex-actions { margin-top: 6px; display: flex; }
+  .btn-delete { background: rgba(180, 40, 40, 0.4); color: #fff; border-radius: 6px; padding: 3px 8px; font-size: .7rem; margin-left: auto; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
 
   .btn-add {
     width: 100%; background: rgba(75, 163, 104, 0.35); border: 1px solid rgba(142, 218, 165, 0.4);
-    border-radius: 10px; padding: 8px; font-size: .84rem; color: #fff; font-weight: 700; cursor: pointer;
+    border-radius: 9px; padding: 7px; font-size: .8rem; color: #fff; font-weight: 700; cursor: pointer;
   }
 
-  footer { color: var(--muted); font-size: .7rem; text-align: center; }
+  footer { color: var(--muted); font-size: .68rem; text-align: center; }
 </style>
 </head>
 <body>
@@ -307,51 +383,64 @@
   <header>
     <div>
       <h1>🩹 Physio Workout Suite</h1>
-      <div class="sub">Widescreen Edition · Independent Media & Timer Controls</div>
+      <div class="sub">Drag divider to resize layout · Invidious search engine active</div>
+    </div>
+    <div class="header-tools">
+      <div class="scale-ctrl">
+        <span>⏱️ Timer Size:</span>
+        <input type="range" id="timerSizeSlider" min="80" max="180" value="105">
+      </div>
     </div>
   </header>
 
-  <div class="layout-grid">
+  <div class="layout-grid" id="layoutGrid">
     <!-- Left Column: Media Suite -->
-    <div class="left-col">
+    <div class="left-col" id="leftCol">
       <div class="media-panel">
         <div class="tab-bar">
-          <button class="tab-btn active" data-tab="tab-yt">📺 YouTube Video / Search</button>
+          <button class="tab-btn active" data-tab="tab-yt">📺 YouTube Search</button>
           <button class="tab-btn" data-tab="tab-audio">🌿 Nature Sounds</button>
           <button class="tab-btn" data-tab="tab-local">📁 Local Media</button>
         </div>
 
-        <!-- Tab 1: YouTube Search & Player -->
+        <!-- Tab 1: Mini YouTube Player & Results Explorer -->
         <div class="tab-content active" id="tab-yt">
           <div class="search-row">
-            <input type="text" class="media-inp" id="ytInp" placeholder="Enter link or search term (e.g. momomi, lofi, stretching)">
-            <button class="btn-action" id="btnLoadYt">Load / Search</button>
+            <input type="text" class="media-inp" id="ytInp" placeholder="Search YouTube or paste URL (e.g. momomi, pilates, ghibli piano)">
+            <button class="btn-action" id="btnSearchYt">🔍 Search</button>
           </div>
           <div class="video-viewport">
-            <iframe id="ytFrame" src="https://www.youtube-nocookie.com/embed?listType=search&list=lofi+workout+ambient&enablejsapi=1" allow="autoplay; fullscreen; encrypted-media"></iframe>
+            <iframe id="ytFrame" src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?enablejsapi=1&autoplay=0&rel=0" allow="autoplay; fullscreen; encrypted-media"></iframe>
+          </div>
+          <div class="yt-results-drawer">
+            <div class="results-grid" id="resultsGrid">
+              <div style="font-size:.76rem;color:var(--muted);grid-column:1/-1;text-align:center;padding:12px;">
+                Type keywords above to search YouTube without Leaving this page.
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Tab 2: Nature Sounds -->
+        <!-- Tab 2: Nature Sounds (Wikimedia Clean Audio CDN) -->
         <div class="tab-content" id="tab-audio">
           <div class="sound-grid">
             <div class="sound-card active" data-src="">
               <span>🔇</span><small>Mute</small>
             </div>
-            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=rain-and-thunder-nature-sounds-7803.mp3">
-              <span>🌧️</span><small>Rain & Thunder</small>
+            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Rain_sound.ogg">
+              <span>🌧️</span><small>Rainfall</small>
             </div>
-            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_849646b986.mp3?filename=forest-birds-chirping-nature-sounds-7798.mp3">
+            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Forest_birds_ambience_sound.ogg">
               <span>🌲</span><small>Forest Birds</small>
             </div>
-            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c770c89a.mp3?filename=ocean-waves-ambient-relaxing-sound-10940.mp3">
+            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Ocean_waves.ogg">
               <span>🌊</span><small>Ocean Waves</small>
             </div>
-            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=crackling-fireplace-nature-sounds-8012.mp3">
-              <span>🔥</span><small>Campfire</small>
+            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/1/14/Small_stream_flowing.ogg">
+              <span>💧</span><small>Creek Stream</small>
             </div>
-            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=soft-rain-ambient-111154.mp3">
-              <span>💧</span><small>Gentle Rain</small>
+            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Bird_song_in_spring.ogg">
+              <span>☀️</span><small>Sunny Meadow</small>
             </div>
           </div>
           <audio id="ambientAudio" loop crossorigin="anonymous"></audio>
@@ -369,10 +458,13 @@
       </div>
     </div>
 
-    <!-- Right Column: Timer & Routine -->
-    <div class="right-col">
+    <!-- Draggable Resizer Bar -->
+    <div class="resizer-bar" id="resizerBar"></div>
+
+    <!-- Right Column: Timer & Playlist -->
+    <div class="right-col" id="rightCol">
       <div class="stage">
-        <div class="circle-wrap">
+        <div class="circle-wrap" id="circleWrap">
           <svg viewBox="0 0 200 200">
             <circle class="bg" cx="100" cy="100" r="86"/>
             <circle class="fg" id="fgCircle" cx="100" cy="100" r="86"
@@ -407,12 +499,12 @@
     </div>
   </div>
 
-  <footer>Independent Audio/Video streams · Master Pause Available</footer>
+  <footer>Fully unbundled audio & timer · Drag bar to rebalance layout</footer>
 </div>
 
 <script>
 /* ═══════════════════ DATA & STORAGE ═══════════════════ */
-const STORAGE_KEY = 'physio_suite_v3';
+const STORAGE_KEY = 'physio_suite_v4';
 const CIRC = 2 * Math.PI * 86;
 
 const DEFAULT_EXERCISES = [
@@ -452,10 +544,44 @@ const el={
   title:$('exTitle'), phase:$('exPhase'), bignum:$('bignum'),
   fg:$('fgCircle'), btnStart:$('btnStart'), btnPause:$('btnPause'),
   btnSkip:$('btnSkip'), btnReset:$('btnReset'), playlist:$('playlist'),
-  ytFrame:$('ytFrame'), ytInp:$('ytInp'), btnLoadYt:$('btnLoadYt'),
-  ambientAudio:$('ambientAudio'), localVideo:$('localVideo'), localFileInput:$('localFileInput'),
-  btnPauseAll:$('btnPauseAll')
+  ytFrame:$('ytFrame'), ytInp:$('ytInp'), btnSearchYt:$('btnSearchYt'),
+  resultsGrid:$('resultsGrid'), ambientAudio:$('ambientAudio'), localVideo:$('localVideo'),
+  localFileInput:$('localFileInput'), btnPauseAll:$('btnPauseAll'),
+  leftCol:$('leftCol'), resizerBar:$('resizerBar'), layoutGrid:$('layoutGrid'),
+  timerSizeSlider:$('timerSizeSlider'), circleWrap:$('circleWrap')
 };
+
+/* ═══════════════════ DRAGGABLE RESIZER & TIMER SLIDER ═══════════════════ */
+let isResizing = false;
+
+el.resizerBar.addEventListener('mousedown', e => {
+  isResizing = true;
+  el.resizerBar.classList.add('dragging');
+  document.body.style.cursor = 'col-resize';
+});
+
+window.addEventListener('mousemove', e => {
+  if (!isResizing) return;
+  const gridRect = el.layoutGrid.getBoundingClientRect();
+  const pointerX = e.clientX - gridRect.left;
+  const percent = Math.min(Math.max((pointerX / gridRect.width) * 100, 25), 75);
+  el.leftCol.style.width = percent + '%';
+});
+
+window.addEventListener('mouseup', () => {
+  if (isResizing) {
+    isResizing = false;
+    el.resizerBar.classList.remove('dragging');
+    document.body.style.cursor = 'default';
+  }
+});
+
+// Dynamic Timer Size
+el.timerSizeSlider.addEventListener('input', e => {
+  const val = e.target.value;
+  document.documentElement.style.setProperty('--timer-scale', `${val}px`);
+  el.bignum.style.fontSize = `${val * 0.017}rem`;
+});
 
 /* ═══════════════════ TAB SWITCHING ═══════════════════ */
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -467,27 +593,79 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-/* ═══════════════════ YOUTUBE & AUDIO ENGINE ═══════════════════ */
-function loadMediaContent() {
-  const input = el.ytInp.value.trim();
-  if (!input) return;
+/* ═══════════════════ MINI YOUTUBE SEARCH & PLAYER ═══════════════════ */
+function loadYtVideo(id) {
+  el.ytFrame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&enablejsapi=1&rel=0`;
+}
 
-  // Direct ID check
-  const idMatch = input.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
-  const videoId = idMatch ? idMatch[1] : (/^[a-zA-Z0-9_-]{11}$/.test(input) ? input : null);
+function parseYtId(input) {
+  const clean = input.trim();
+  const match = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+  return match ? match[1] : (/^[a-zA-Z0-9_-]{11}$/.test(clean) ? clean : null);
+}
 
-  if (videoId) {
-    el.ytFrame.src = `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&autoplay=1&rel=0&modestbranding=1`;
+async function searchYouTube(query) {
+  el.resultsGrid.innerHTML = '<div style="font-size:.76rem;color:var(--muted);grid-column:1/-1;text-align:center;padding:12px;">Searching YouTube videos...</div>';
+  
+  // Public open instances of Invidious API
+  const mirrors = [
+    'https://inv.tux.pizza/api/v1/search',
+    'https://invidious.nerdvpn.de/api/v1/search',
+    'https://vid.puffyan.us/api/v1/search'
+  ];
+
+  let items = null;
+  for (let mirror of mirrors) {
+    try {
+      const res = await fetch(`${mirror}?q=${encodeURIComponent(query)}&type=video`);
+      if (res.ok) {
+        items = await res.json();
+        break;
+      }
+    } catch(e) {}
+  }
+
+  if (!items || !items.length) {
+    el.resultsGrid.innerHTML = `
+      <div style="font-size:.76rem;color:var(--muted);grid-column:1/-1;text-align:center;padding:12px;">
+        Search results unavailable right now. You can still paste any YouTube video link directly above!
+      </div>`;
+    return;
+  }
+
+  el.resultsGrid.innerHTML = '';
+  items.slice(0, 12).forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'yt-card';
+    const thumb = v.videoThumbnails?.find(t => t.quality === 'medium')?.url || `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`;
+    card.innerHTML = `
+      <img src="${thumb}" alt="" loading="lazy">
+      <div class="yt-card-info">
+        <div class="yt-card-title">${v.title}</div>
+        <div class="yt-card-sub">${v.author || ''}</div>
+      </div>
+    `;
+    card.addEventListener('click', () => loadYtVideo(v.videoId));
+    el.resultsGrid.appendChild(card);
+  });
+}
+
+function handleMediaSearch() {
+  const val = el.ytInp.value.trim();
+  if (!val) return;
+
+  const directId = parseYtId(val);
+  if (directId) {
+    loadYtVideo(directId);
   } else {
-    // If user types general keywords like "momomi", embed YouTube's official search feed
-    el.ytFrame.src = `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(input)}&enablejsapi=1&autoplay=1`;
+    searchYouTube(val);
   }
 }
 
-el.btnLoadYt.addEventListener('click', loadMediaContent);
-el.ytInp.addEventListener('keydown', e => { if (e.key === 'Enter') loadMediaContent(); });
+el.btnSearchYt.addEventListener('click', handleMediaSearch);
+el.ytInp.addEventListener('keydown', e => { if (e.key === 'Enter') handleMediaSearch(); });
 
-// Ambient sound switcher
+/* ═══════════════════ RELIABLE AUDIO STREAMING ═══════════════════ */
 document.querySelectorAll('.sound-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.sound-card').forEach(c => c.classList.remove('active'));
@@ -495,7 +673,9 @@ document.querySelectorAll('.sound-card').forEach(card => {
     const src = card.dataset.src;
     if (src) {
       el.ambientAudio.src = src;
-      el.ambientAudio.play().catch(e => console.warn("Audio waiting for user gesture", e));
+      el.ambientAudio.play().catch(e => {
+        console.warn("Audio unlock required:", e);
+      });
     } else {
       el.ambientAudio.pause();
       el.ambientAudio.src = '';
@@ -503,7 +683,6 @@ document.querySelectorAll('.sound-card').forEach(card => {
   });
 });
 
-// Local file preview
 el.localFileInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (file) {
@@ -514,17 +693,13 @@ el.localFileInput.addEventListener('change', (e) => {
 
 /* ═══════════════════ MASTER PAUSE ALL ═══════════════════ */
 el.btnPauseAll.addEventListener('click', () => {
-  // 1. Pause workout timer
   if (running && !paused) {
     paused = true;
     el.btnPause.textContent = '▶ Resume';
-    speak('All paused.');
+    speak('Paused.');
   }
-  // 2. Pause ambient sound
   if (el.ambientAudio) el.ambientAudio.pause();
-  // 3. Pause local media
   if (el.localVideo) el.localVideo.pause();
-  // 4. Pause YouTube embed
   try {
     el.ytFrame.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
   } catch(e){}
@@ -922,10 +1097,10 @@ function mSel(opts, val, onChange) {
 function mNumInp(val, min, max, onChange, unit) {
   const wrap=document.createElement('div'); wrap.style.cssText='display:flex;align-items:center;gap:3px;';
   const i=document.createElement('input'); i.type='number'; i.className='f-inp'; i.value=val; i.min=min; i.max=max;
-  i.style.width='50px'; i.disabled=running;
+  i.style.width='44px'; i.disabled=running;
   i.addEventListener('change',()=>{let v=parseInt(i.value,10);if(isNaN(v))v=min;v=Math.max(min,Math.min(max,v));i.value=v;onChange(v);});
   wrap.appendChild(i);
-  if(unit){const u=document.createElement('span');u.textContent=unit;u.style.cssText='font-size:.65rem;color:var(--muted);';wrap.appendChild(u);}
+  if(unit){const u=document.createElement('span');u.textContent=unit;u.style.cssText='font-size:.62rem;color:var(--muted);';wrap.appendChild(u);}
   return wrap;
 }
 
