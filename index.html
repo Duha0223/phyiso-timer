@@ -6,7 +6,7 @@
 <title>Physio Workout Suite</title>
 <style>
   :root {
-    --glass-card: rgba(18, 32, 25, 0.72);
+    --glass-card: rgba(18, 32, 25, 0.76);
     --glass-border: rgba(180, 225, 195, 0.28);
     --glass-border-light: rgba(255, 255, 255, 0.18);
     --text: #f3f9f4;
@@ -17,13 +17,17 @@
     --col-done:   #2e5c3e;
     --col-plain:  #d1973c;
     --col-next:   #345843;
-    --left-col-width: 58%;
-    --timer-scale: 110px;
+    
+    /* Layout Variables */
+    --left-col-width: 44%;
+    --left-top-height: 52%;
+    --right-top-height: 58%;
+    --circle-dyn-size: 150px;
   }
   *, *::before, *::after { box-sizing: border-box; }
-  
+
   body {
-    margin: 0; padding: 12px 16px;
+    margin: 0; padding: 10px 14px;
     background: url('https://wallpapers-clan.com/wp-content/uploads/2024/07/studio-ghibli-totoro-forest-desktop-wallpaper-preview.jpg') no-repeat center center fixed;
     background-size: cover;
     color: var(--text);
@@ -37,240 +41,192 @@
 
   .wrap {
     width: 100%;
-    max-width: 1680px;
-    height: 96vh;
+    max-width: 1720px;
+    height: 97vh;
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
 
+  /* ── Header Bar with Visibility Toggles ── */
   header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 4px;
+    padding: 2px 6px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
-  h1 { font-size: 1.3rem; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
-  .header-tools { display: flex; align-items: center; gap: 14px; }
-  .scale-ctrl { display: flex; align-items: center; gap: 6px; font-size: .76rem; color: var(--muted); }
-  .scale-ctrl input { width: 90px; accent-color: var(--col-rest); }
-  .sub { color: var(--muted); font-size: .78rem; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
+  .brand-group { display: flex; align-items: baseline; gap: 10px; }
+  h1 { font-size: 1.25rem; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
+  .sub { color: var(--muted); font-size: .75rem; }
 
-  /* ── Adjustable Split Layout ── */
+  .toggle-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .toggle-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border-light);
+    color: var(--muted);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: .75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .toggle-btn.active {
+    background: var(--col-rest);
+    color: #fff;
+    border-color: #8edaa5;
+  }
+
+  /* ── Main Layout: Left & Right Columns ── */
   .layout-grid {
     display: flex;
     flex: 1;
     min-height: 0;
-    gap: 0;
     position: relative;
     user-select: none;
   }
 
-  /* ── Left Column: Media Suite ── */
+  /* ── Left Column: Timer on Top, Ambient Below ── */
   .left-col {
     width: var(--left-col-width);
-    min-width: 320px;
-    max-width: 80%;
+    min-width: 280px;
+    max-width: 75%;
     display: flex;
     flex-direction: column;
     height: 100%;
     min-height: 0;
   }
 
-  /* ── Draggable Splitter Divider ── */
-  .resizer-bar {
-    width: 12px;
+  /* ── Right Column: YouTube on Top, Playlist Below ── */
+  .right-col {
+    flex: 1;
+    min-width: 320px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* ── Divider Splitters (Vertical & Horizontal) ── */
+  .resizer-bar-v {
+    width: 10px;
     cursor: col-resize;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 4px;
     z-index: 10;
-    transition: background .2s;
   }
-  .resizer-bar::after {
+  .resizer-bar-v::after {
     content: '';
     width: 4px;
-    height: 60px;
+    height: 70px;
     background: var(--glass-border);
     border-radius: 4px;
     transition: background .2s, height .2s;
   }
-  .resizer-bar:hover::after, .resizer-bar.dragging::after {
+  .resizer-bar-v:hover::after, .resizer-bar-v.dragging::after {
     background: var(--col-rest);
-    height: 100px;
+    height: 120px;
   }
 
-  /* ── Right Column: Timer & Routine ── */
-  .right-col {
-    flex: 1;
-    min-width: 320px;
+  .resizer-bar-h {
+    height: 10px;
+    cursor: row-resize;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    height: 100%;
-    min-height: 0;
+    align-items: center;
+    justify-content: center;
+    margin: 3px 0;
+    z-index: 10;
   }
-
-  .media-panel {
-    background: var(--glass-card);
-    border: 1.5px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 12px 14px;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.4);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    height: 100%;
-    min-height: 0;
+  .resizer-bar-h::after {
+    content: '';
+    width: 70px;
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: 4px;
+    transition: background .2s, width .2s;
   }
-
-  .tab-bar {
-    display: flex;
-    gap: 8px;
-    border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 6px;
-  }
-  .tab-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--glass-border-light);
-    color: var(--muted);
-    padding: 5px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: .8rem;
-    font-weight: 600;
-  }
-  .tab-btn.active {
+  .resizer-bar-h:hover::after, .resizer-bar-h.dragging::after {
     background: var(--col-rest);
-    color: #fff;
-    border-color: #8edaa5;
+    width: 120px;
   }
 
-  .tab-content {
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-    min-height: 0;
-  }
-  .tab-content.active { display: flex; }
-
-  .search-row { display: flex; gap: 8px; }
-  .media-inp {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--glass-border);
-    border-radius: 9px;
-    padding: 8px 12px;
-    font-size: .84rem;
-    color: #fff;
-  }
-  .media-inp:focus { outline: 2px solid var(--col-rest); }
-  .btn-action {
-    background: var(--col-rest);
-    border-radius: 9px;
-    padding: 8px 15px;
-    font-size: .82rem;
-    border: none;
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .video-viewport {
-    flex: 1.2;
-    min-height: 160px;
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    background: rgba(0, 0, 0, 0.7);
-    border: 1.5px solid var(--glass-border);
-  }
-  .video-viewport iframe, .video-viewport video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-
-  /* ── YouTube Search Grid (Mini YouTube App) ── */
-  .yt-results-drawer {
-    flex: 1;
-    min-height: 120px;
-    overflow-y: auto;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 8px;
-  }
-  .yt-results-drawer::-webkit-scrollbar { width: 5px; }
-  .yt-results-drawer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-  .results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 8px;
-  }
-  .yt-card {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--glass-border-light);
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform .15s, background .15s;
-    display: flex;
-    flex-direction: column;
-  }
-  .yt-card:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-2px); }
-  .yt-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #000; }
-  .yt-card-info { padding: 6px; display: flex; flex-direction: column; gap: 2px; }
-  .yt-card-title { font-size: .72rem; font-weight: 700; color: #fff; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .yt-card-sub { font-size: .65rem; color: var(--muted); }
-
-  /* ── Soundscape Cards ── */
-  .sound-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 4px;
-  }
-  .sound-card {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid var(--glass-border);
-    border-radius: 10px;
-    padding: 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: background .2s, border-color .2s;
-  }
-  .sound-card:hover { background: rgba(255, 255, 255, 0.15); }
-  .sound-card.active { background: var(--col-rest); border-color: #8edaa5; }
-  .sound-card span { display: block; font-size: 1.3rem; margin-bottom: 2px; }
-  .sound-card small { font-size: .76rem; font-weight: 600; }
-
-  /* ── Right Stage: Timer ── */
-  .stage {
+  /* ── Generic Glass Panel Container ── */
+  .panel {
     background: var(--glass-card);
     border: 1.5px solid var(--glass-border);
     border-radius: 18px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.38);
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    position: relative;
+    min-height: 70px;
+    overflow: hidden;
   }
+  .panel.hidden { display: none !important; }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--glass-border);
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  /* ── Stage Timer Box ── */
+  #panel-timer {
+    height: var(--left-top-height);
+    flex-shrink: 0;
+    container-type: size;
+  }
+  .stage-inner {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    justify-items: center;
+    gap: 14px;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    padding: 4px 8px;
+  }
+
+  /* Centered Circle with Box Clamping */
+  .circle-center-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
   .circle-wrap {
     position: relative;
-    width: var(--timer-scale);
-    height: var(--timer-scale);
+    width: min(var(--circle-dyn-size), 75cqh, 55cqw);
+    height: min(var(--circle-dyn-size), 75cqh, 55cqw);
+    aspect-ratio: 1/1;
     flex-shrink: 0;
-    transition: width .15s, height .15s;
   }
   .circle-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
   circle.bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 12; }
@@ -279,50 +235,110 @@
     position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
-  .bignum { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+  .bignum { font-size: min(calc(var(--circle-dyn-size) * 0.28), 2.6rem); font-weight: 900; line-height: 1; }
 
-  .stage-info { flex: 1; min-width: 0; }
-  .ex-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ex-phase {
-    font-size: .7rem; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--muted); margin-bottom: 6px;
+  .stage-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 90px;
   }
-  .btn-row { display: flex; gap: 5px; flex-wrap: wrap; }
+  .ex-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+  .ex-phase { font-size: .68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+
+  /* Vertically Stacked Controls */
+  .btn-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+    flex-shrink: 0;
+  }
   button.ctrl {
     border: 1px solid var(--glass-border-light); border-radius: 8px; padding: 6px 10px;
-    font-size: .76rem; font-weight: 700; cursor: pointer;
+    font-size: .75rem; font-weight: 700; cursor: pointer;
     background: rgba(255,255,255,0.12); color: var(--text);
+    width: 96px;
+    text-align: center;
+    transition: transform .1s, background .15s;
   }
   button.ctrl:hover { background: rgba(255,255,255,0.22); }
+  button.ctrl:active { transform: scale(0.96); }
   button.ctrl.primary { background: var(--col-active); border-color: rgba(255,255,255,0.3); }
   button.ctrl.danger  { background: rgba(144, 48, 16, 0.7); }
   button.ctrl.pause-all { background: #b8600a; border-color: #f7a261; }
   button:disabled { opacity: .35; cursor: not-allowed; }
 
-  /* ── Playlist Panel ── */
-  .playlist-panel {
+  /* ── Ambient Sound Panel ── */
+  #panel-sounds {
     flex: 1;
     min-height: 0;
-    background: var(--glass-card);
-    border: 1.5px solid var(--glass-border);
-    border-radius: 18px;
-    padding: 10px 14px;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.35);
-    display: flex;
-    flex-direction: column;
+    overflow-y: auto;
   }
-  .playlist-header {
+  .sound-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .sound-card {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .sound-card:hover { background: rgba(255, 255, 255, 0.15); }
+  .sound-card.active { background: var(--col-rest); border-color: #8edaa5; }
+  .sound-card span { display: block; font-size: 1.3rem; margin-bottom: 2px; }
+  .sound-card small { font-size: .75rem; font-weight: 600; }
+
+  /* ── Mini YouTube Station (Browsable Mirror) ── */
+  #panel-yt {
+    height: var(--right-top-height);
+    flex-shrink: 0;
+  }
+  .yt-nav {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 6px;
     margin-bottom: 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--glass-border);
+    flex-shrink: 0;
+    align-items: center;
   }
-  .playlist-header span {
-    font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+  .btn-mirror {
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid var(--glass-border-light);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: .74rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-mirror:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
+  .yt-station-wrap {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    border: 1.5px solid var(--glass-border);
+  }
+  .yt-station-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* ── Playlist Panel ── */
+  #panel-playlist {
+    flex: 1;
+    min-height: 0;
   }
   .playlist-container {
     overflow-y: auto;
@@ -343,7 +359,7 @@
   }
   li.ex-item:hover { background: rgba(255,255,255,0.1); }
   li.ex-item.active-ex { border-color: #f7a261; box-shadow: 0 0 10px rgba(224, 138, 60, 0.35); background: rgba(46, 75, 58, 0.7); }
-  
+
   .ex-header {
     display: flex; align-items: center; gap: 8px; padding: 7px 9px; cursor: pointer; user-select: none;
   }
@@ -354,7 +370,7 @@
   .ex-label-meta { font-size: .68rem; color: var(--muted); }
   .chevron { color: var(--muted); font-size: .78rem; transition: transform .2s; }
   .chevron.open { transform: rotate(90deg); }
-  
+
   .ex-body { display: none; padding: 6px 9px 8px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15); }
   .ex-body.open { display: block; }
   .field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px,1fr)); gap: 6px; }
@@ -373,6 +389,7 @@
   .btn-add {
     width: 100%; background: rgba(75, 163, 104, 0.35); border: 1px solid rgba(142, 218, 165, 0.4);
     border-radius: 9px; padding: 7px; font-size: .8rem; color: #fff; font-weight: 700; cursor: pointer;
+    flex-shrink: 0;
   }
 
   footer { color: var(--muted); font-size: .68rem; text-align: center; }
@@ -381,115 +398,119 @@
 <body>
 <div class="wrap">
   <header>
-    <div>
+    <div class="brand-group">
       <h1>🩹 Physio Workout Suite</h1>
-      <div class="sub">Drag divider to resize layout · Invidious search engine active</div>
+      <div class="sub">Dynamic Multi-Split Station</div>
     </div>
-    <div class="header-tools">
-      <div class="scale-ctrl">
-        <span>⏱️ Timer Size:</span>
-        <input type="range" id="timerSizeSlider" min="80" max="180" value="105">
-      </div>
+    <div class="toggle-bar">
+      <span style="font-size:.72rem;color:var(--muted);margin-right:2px;">Panels:</span>
+      <button class="toggle-btn active" data-target="panel-timer">⏱️ Timer</button>
+      <button class="toggle-btn active" data-target="panel-sounds">🌿 Sounds</button>
+      <button class="toggle-btn active" data-target="panel-yt">📺 YouTube</button>
+      <button class="toggle-btn active" data-target="panel-playlist">📋 Playlist</button>
     </div>
   </header>
 
   <div class="layout-grid" id="layoutGrid">
-    <!-- Left Column: Media Suite -->
+    <!-- LEFT SIDE: Timer on Top, Ambient Sounds Below -->
     <div class="left-col" id="leftCol">
-      <div class="media-panel">
-        <div class="tab-bar">
-          <button class="tab-btn active" data-tab="tab-yt">📺 YouTube Search</button>
-          <button class="tab-btn" data-tab="tab-audio">🌿 Nature Sounds</button>
-          <button class="tab-btn" data-tab="tab-local">📁 Local Media</button>
+      <!-- 1. Stage Timer Box -->
+      <div class="panel" id="panel-timer">
+        <div class="panel-header">
+          <span class="panel-title">⏱️ Workout Stage</span>
         </div>
-
-        <!-- Tab 1: Mini YouTube Player & Results Explorer -->
-        <div class="tab-content active" id="tab-yt">
-          <div class="search-row">
-            <input type="text" class="media-inp" id="ytInp" placeholder="Search YouTube or paste URL (e.g. momomi, pilates, ghibli piano)">
-            <button class="btn-action" id="btnSearchYt">🔍 Search</button>
-          </div>
-          <div class="video-viewport">
-            <iframe id="ytFrame" src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?enablejsapi=1&autoplay=0&rel=0" allow="autoplay; fullscreen; encrypted-media"></iframe>
-          </div>
-          <div class="yt-results-drawer">
-            <div class="results-grid" id="resultsGrid">
-              <div style="font-size:.76rem;color:var(--muted);grid-column:1/-1;text-align:center;padding:12px;">
-                Type keywords above to search YouTube without Leaving this page.
+        <div class="stage-inner">
+          <!-- Centered Circle Container -->
+          <div class="circle-center-slot">
+            <div class="circle-wrap" id="circleWrap">
+              <svg viewBox="0 0 200 200">
+                <circle class="bg" cx="100" cy="100" r="86"/>
+                <circle class="fg" id="fgCircle" cx="100" cy="100" r="86"
+                  stroke-dasharray="540" stroke-dashoffset="540" stroke="var(--col-ready)"/>
+              </svg>
+              <div class="circle-center">
+                <div class="bignum" id="bignum">--</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Tab 2: Nature Sounds (Wikimedia Clean Audio CDN) -->
-        <div class="tab-content" id="tab-audio">
-          <div class="sound-grid">
-            <div class="sound-card active" data-src="">
-              <span>🔇</span><small>Mute</small>
-            </div>
-            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Rain_sound.ogg">
-              <span>🌧️</span><small>Rainfall</small>
-            </div>
-            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Forest_birds_ambience_sound.ogg">
-              <span>🌲</span><small>Forest Birds</small>
-            </div>
-            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Ocean_waves.ogg">
-              <span>🌊</span><small>Ocean Waves</small>
-            </div>
-            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/1/14/Small_stream_flowing.ogg">
-              <span>💧</span><small>Creek Stream</small>
-            </div>
-            <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Bird_song_in_spring.ogg">
-              <span>☀️</span><small>Sunny Meadow</small>
-            </div>
+          <!-- Routine Labels -->
+          <div class="stage-info">
+            <div class="ex-title" id="exTitle">Ready</div>
+            <div class="ex-phase" id="exPhase">Tap Start Workout</div>
           </div>
-          <audio id="ambientAudio" loop crossorigin="anonymous"></audio>
-        </div>
 
-        <!-- Tab 3: Local File -->
-        <div class="tab-content" id="tab-local">
-          <div class="search-row">
-            <input type="file" class="media-inp" id="localFileInput" accept="video/*,audio/*">
-          </div>
-          <div class="video-viewport">
-            <video id="localVideo" controls loop playsinline></video>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Draggable Resizer Bar -->
-    <div class="resizer-bar" id="resizerBar"></div>
-
-    <!-- Right Column: Timer & Playlist -->
-    <div class="right-col" id="rightCol">
-      <div class="stage">
-        <div class="circle-wrap" id="circleWrap">
-          <svg viewBox="0 0 200 200">
-            <circle class="bg" cx="100" cy="100" r="86"/>
-            <circle class="fg" id="fgCircle" cx="100" cy="100" r="86"
-              stroke-dasharray="540" stroke-dashoffset="540" stroke="var(--col-ready)"/>
-          </svg>
-          <div class="circle-center">
-            <div class="bignum" id="bignum">--</div>
-          </div>
-        </div>
-        <div class="stage-info">
-          <div class="ex-title" id="exTitle">Ready</div>
-          <div class="ex-phase" id="exPhase">Tap Start Workout</div>
-          <div class="btn-row">
+          <!-- Vertically Stacked Controls on the Side -->
+          <div class="btn-col">
             <button class="ctrl primary" id="btnStart">▶ Start</button>
             <button class="ctrl" id="btnPause" disabled>⏸ Pause</button>
             <button class="ctrl pause-all" id="btnPauseAll">⏸ Pause All</button>
             <button class="ctrl" id="btnSkip" disabled>⏭ Skip</button>
-            <button class="ctrl danger" id="btnReset">↺</button>
+            <button class="ctrl danger" id="btnReset">↺ Reset</button>
           </div>
         </div>
       </div>
 
-      <div class="playlist-panel">
-        <div class="playlist-header">
-          <span>Workout Routine</span>
+      <!-- Left Horizontal Resizer Bar -->
+      <div class="resizer-bar-h" id="resizerLeftH"></div>
+
+      <!-- 2. Ambient Sounds Box -->
+      <div class="panel" id="panel-sounds">
+        <div class="panel-header">
+          <span class="panel-title">🌿 Ambient Sounds</span>
+        </div>
+        <div class="sound-grid">
+          <div class="sound-card active" data-src="">
+            <span>🔇</span><small>Mute</small>
+          </div>
+          <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Rain_sound.ogg">
+            <span>🌧️</span><small>Rain</small>
+          </div>
+          <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Forest_birds_ambience_sound.ogg">
+            <span>🌲</span><small>Birds</small>
+          </div>
+          <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Ocean_waves.ogg">
+            <span>🌊</span><small>Ocean</small>
+          </div>
+          <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/1/14/Small_stream_flowing.ogg">
+            <span>💧</span><small>Stream</small>
+          </div>
+          <div class="sound-card" data-src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Bird_song_in_spring.ogg">
+            <span>☀️</span><small>Meadow</small>
+          </div>
+        </div>
+        <audio id="ambientAudio" loop crossorigin="anonymous"></audio>
+      </div>
+    </div>
+
+    <!-- Middle Vertical Resizer Bar -->
+    <div class="resizer-bar-v" id="resizerBarV"></div>
+
+    <!-- RIGHT SIDE: Mini YouTube on Top, Playlist Below -->
+    <div class="right-col" id="rightCol">
+      <!-- 3. Mini YouTube Station Box (Full Browsable Interface) -->
+      <div class="panel" id="panel-yt">
+        <div class="panel-header">
+          <span class="panel-title">📺 Mini YouTube Station</span>
+        </div>
+        <div class="yt-nav">
+          <button class="btn-mirror" onclick="setMirror('https://piped.video/trending')">Piped</button>
+          <button class="btn-mirror" onclick="setMirror('https://inv.nadeko.net')">Nadeko</button>
+          <button class="btn-mirror" onclick="setMirror('https://invidious.asir.dev')">Asir</button>
+          <button class="btn-mirror" style="margin-left:auto;" onclick="reloadFrame()">↺ Reload</button>
+        </div>
+        <div class="yt-station-wrap">
+          <iframe id="ytStationFrame" src="https://piped.video/trending" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+        </div>
+      </div>
+
+      <!-- Right Horizontal Resizer Bar -->
+      <div class="resizer-bar-h" id="resizerRightH"></div>
+
+      <!-- 4. Exercise Playlist Box -->
+      <div class="panel" id="panel-playlist">
+        <div class="panel-header">
+          <span class="panel-title">📋 Exercise Sequence</span>
         </div>
         <div class="playlist-container">
           <ul id="playlist"></ul>
@@ -499,12 +520,12 @@
     </div>
   </div>
 
-  <footer>Fully unbundled audio & timer · Drag bar to rebalance layout</footer>
+  <footer>Fully adjustable layout splitters · Keep screen active enabled</footer>
 </div>
 
 <script>
 /* ═══════════════════ DATA & STORAGE ═══════════════════ */
-const STORAGE_KEY = 'physio_suite_v4';
+const STORAGE_KEY = 'physio_suite_v8';
 const CIRC = 2 * Math.PI * 86;
 
 const DEFAULT_EXERCISES = [
@@ -544,128 +565,114 @@ const el={
   title:$('exTitle'), phase:$('exPhase'), bignum:$('bignum'),
   fg:$('fgCircle'), btnStart:$('btnStart'), btnPause:$('btnPause'),
   btnSkip:$('btnSkip'), btnReset:$('btnReset'), playlist:$('playlist'),
-  ytFrame:$('ytFrame'), ytInp:$('ytInp'), btnSearchYt:$('btnSearchYt'),
-  resultsGrid:$('resultsGrid'), ambientAudio:$('ambientAudio'), localVideo:$('localVideo'),
-  localFileInput:$('localFileInput'), btnPauseAll:$('btnPauseAll'),
-  leftCol:$('leftCol'), resizerBar:$('resizerBar'), layoutGrid:$('layoutGrid'),
-  timerSizeSlider:$('timerSizeSlider'), circleWrap:$('circleWrap')
+  ambientAudio:$('ambientAudio'), btnPauseAll:$('btnPauseAll'),
+  leftCol:$('leftCol'), rightCol:$('rightCol'), layoutGrid:$('layoutGrid'),
+  resizerBarV:$('resizerBarV'), resizerLeftH:$('resizerLeftH'), resizerRightH:$('resizerRightH'),
+  panelTimer:$('panel-timer'), panelSounds:$('panel-sounds'), panelYt:$('panel-yt'), panelPlaylist:$('panel-playlist'),
+  ytStationFrame:$('ytStationFrame')
 };
 
-/* ═══════════════════ DRAGGABLE RESIZER & TIMER SLIDER ═══════════════════ */
-let isResizing = false;
+/* ═══════════════════ RESIZERS ═══════════════════ */
+let currentDrag = null;
 
-el.resizerBar.addEventListener('mousedown', e => {
-  isResizing = true;
-  el.resizerBar.classList.add('dragging');
+el.resizerBarV.addEventListener('mousedown', () => {
+  currentDrag = 'vertical';
+  el.resizerBarV.classList.add('dragging');
   document.body.style.cursor = 'col-resize';
 });
 
+el.resizerLeftH.addEventListener('mousedown', () => {
+  currentDrag = 'leftH';
+  el.resizerLeftH.classList.add('dragging');
+  document.body.style.cursor = 'row-resize';
+});
+
+el.resizerRightH.addEventListener('mousedown', () => {
+  currentDrag = 'rightH';
+  el.resizerRightH.classList.add('dragging');
+  document.body.style.cursor = 'row-resize';
+});
+
 window.addEventListener('mousemove', e => {
-  if (!isResizing) return;
-  const gridRect = el.layoutGrid.getBoundingClientRect();
-  const pointerX = e.clientX - gridRect.left;
-  const percent = Math.min(Math.max((pointerX / gridRect.width) * 100, 25), 75);
-  el.leftCol.style.width = percent + '%';
+  if (!currentDrag) return;
+
+  if (currentDrag === 'vertical') {
+    const gridRect = el.layoutGrid.getBoundingClientRect();
+    const percent = ((e.clientX - gridRect.left) / gridRect.width) * 100;
+    const clamped = Math.min(Math.max(percent, 20), 80);
+    document.documentElement.style.setProperty('--left-col-width', `${clamped}%`);
+  } 
+  else if (currentDrag === 'leftH') {
+    const colRect = el.leftCol.getBoundingClientRect();
+    const percent = ((e.clientY - colRect.top) / colRect.height) * 100;
+    const clamped = Math.min(Math.max(percent, 15), 85);
+    document.documentElement.style.setProperty('--left-top-height', `${clamped}%`);
+    
+    // Scale timer dynamically within containment
+    const availableH = (colRect.height * (clamped / 100)) - 55;
+    const dynSize = Math.max(Math.min(availableH, 260), 90);
+    document.documentElement.style.setProperty('--circle-dyn-size', `${dynSize}px`);
+  } 
+  else if (currentDrag === 'rightH') {
+    const colRect = el.rightCol.getBoundingClientRect();
+    const percent = ((e.clientY - colRect.top) / colRect.height) * 100;
+    const clamped = Math.min(Math.max(percent, 15), 85);
+    document.documentElement.style.setProperty('--right-top-height', `${clamped}%`);
+  }
 });
 
 window.addEventListener('mouseup', () => {
-  if (isResizing) {
-    isResizing = false;
-    el.resizerBar.classList.remove('dragging');
+  if (currentDrag) {
+    el.resizerBarV.classList.remove('dragging');
+    el.resizerLeftH.classList.remove('dragging');
+    el.resizerRightH.classList.remove('dragging');
     document.body.style.cursor = 'default';
+    currentDrag = null;
   }
 });
 
-// Dynamic Timer Size
-el.timerSizeSlider.addEventListener('input', e => {
-  const val = e.target.value;
-  document.documentElement.style.setProperty('--timer-scale', `${val}px`);
-  el.bignum.style.fontSize = `${val * 0.017}rem`;
-});
-
-/* ═══════════════════ TAB SWITCHING ═══════════════════ */
-document.querySelectorAll('.tab-btn').forEach(btn => {
+/* ═══════════════════ PANEL VISIBILITY TOGGLES ═══════════════════ */
+document.querySelectorAll('.toggle-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    $(btn.dataset.tab).classList.add('active');
+    const targetId = btn.dataset.target;
+    const panel = $(targetId);
+    if (panel) {
+      panel.classList.toggle('hidden');
+      btn.classList.toggle('active', !panel.classList.contains('hidden'));
+
+      if (targetId === 'panel-timer' || targetId === 'panel-sounds') {
+        const timerHidden = el.panelTimer.classList.contains('hidden');
+        const soundsHidden = el.panelSounds.classList.contains('hidden');
+        el.resizerLeftH.style.display = (timerHidden || soundsHidden) ? 'none' : 'flex';
+        if (timerHidden) el.panelSounds.style.flex = '1';
+        if (soundsHidden) el.panelTimer.style.height = '100%';
+        if (!timerHidden && !soundsHidden) el.panelTimer.style.height = 'var(--left-top-height)';
+      }
+
+      if (targetId === 'panel-yt' || targetId === 'panel-playlist') {
+        const ytHidden = el.panelYt.classList.contains('hidden');
+        const playlistHidden = el.panelPlaylist.classList.contains('hidden');
+        el.resizerRightH.style.display = (ytHidden || playlistHidden) ? 'none' : 'flex';
+        if (ytHidden) el.panelPlaylist.style.flex = '1';
+        if (playlistHidden) el.panelYt.style.height = '100%';
+        if (!ytHidden && !playlistHidden) el.panelYt.style.height = 'var(--right-top-height)';
+      }
+    }
   });
 });
 
-/* ═══════════════════ MINI YOUTUBE SEARCH & PLAYER ═══════════════════ */
-function loadYtVideo(id) {
-  el.ytFrame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&enablejsapi=1&rel=0`;
+/* ═══════════════════ MINI YOUTUBE STATION CONTROLS ═══════════════════ */
+function setMirror(url) {
+  el.ytStationFrame.src = url;
 }
 
-function parseYtId(input) {
-  const clean = input.trim();
-  const match = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
-  return match ? match[1] : (/^[a-zA-Z0-9_-]{11}$/.test(clean) ? clean : null);
+function reloadFrame() {
+  const current = el.ytStationFrame.src;
+  el.ytStationFrame.src = '';
+  setTimeout(() => { el.ytStationFrame.src = current; }, 50);
 }
 
-async function searchYouTube(query) {
-  el.resultsGrid.innerHTML = '<div style="font-size:.76rem;color:var(--muted);grid-column:1/-1;text-align:center;padding:12px;">Searching YouTube videos...</div>';
-  
-  // Public open instances of Invidious API
-  const mirrors = [
-    'https://inv.tux.pizza/api/v1/search',
-    'https://invidious.nerdvpn.de/api/v1/search',
-    'https://vid.puffyan.us/api/v1/search'
-  ];
-
-  let items = null;
-  for (let mirror of mirrors) {
-    try {
-      const res = await fetch(`${mirror}?q=${encodeURIComponent(query)}&type=video`);
-      if (res.ok) {
-        items = await res.json();
-        break;
-      }
-    } catch(e) {}
-  }
-
-  if (!items || !items.length) {
-    el.resultsGrid.innerHTML = `
-      <div style="font-size:.76rem;color:var(--muted);grid-column:1/-1;text-align:center;padding:12px;">
-        Search results unavailable right now. You can still paste any YouTube video link directly above!
-      </div>`;
-    return;
-  }
-
-  el.resultsGrid.innerHTML = '';
-  items.slice(0, 12).forEach(v => {
-    const card = document.createElement('div');
-    card.className = 'yt-card';
-    const thumb = v.videoThumbnails?.find(t => t.quality === 'medium')?.url || `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`;
-    card.innerHTML = `
-      <img src="${thumb}" alt="" loading="lazy">
-      <div class="yt-card-info">
-        <div class="yt-card-title">${v.title}</div>
-        <div class="yt-card-sub">${v.author || ''}</div>
-      </div>
-    `;
-    card.addEventListener('click', () => loadYtVideo(v.videoId));
-    el.resultsGrid.appendChild(card);
-  });
-}
-
-function handleMediaSearch() {
-  const val = el.ytInp.value.trim();
-  if (!val) return;
-
-  const directId = parseYtId(val);
-  if (directId) {
-    loadYtVideo(directId);
-  } else {
-    searchYouTube(val);
-  }
-}
-
-el.btnSearchYt.addEventListener('click', handleMediaSearch);
-el.ytInp.addEventListener('keydown', e => { if (e.key === 'Enter') handleMediaSearch(); });
-
-/* ═══════════════════ RELIABLE AUDIO STREAMING ═══════════════════ */
+/* ═══════════════════ AMBIENT AUDIO ═══════════════════ */
 document.querySelectorAll('.sound-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.sound-card').forEach(c => c.classList.remove('active'));
@@ -673,9 +680,7 @@ document.querySelectorAll('.sound-card').forEach(card => {
     const src = card.dataset.src;
     if (src) {
       el.ambientAudio.src = src;
-      el.ambientAudio.play().catch(e => {
-        console.warn("Audio unlock required:", e);
-      });
+      el.ambientAudio.play().catch(e => console.warn("Audio waiting for interaction:", e));
     } else {
       el.ambientAudio.pause();
       el.ambientAudio.src = '';
@@ -683,26 +688,14 @@ document.querySelectorAll('.sound-card').forEach(card => {
   });
 });
 
-el.localFileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    el.localVideo.src = URL.createObjectURL(file);
-    el.localVideo.play().catch(()=>{});
-  }
-});
-
 /* ═══════════════════ MASTER PAUSE ALL ═══════════════════ */
 el.btnPauseAll.addEventListener('click', () => {
   if (running && !paused) {
     paused = true;
     el.btnPause.textContent = '▶ Resume';
-    speak('Paused.');
+    speak('All paused.');
   }
   if (el.ambientAudio) el.ambientAudio.pause();
-  if (el.localVideo) el.localVideo.pause();
-  try {
-    el.ytFrame.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-  } catch(e){}
 });
 
 /* ═══════════════════ WAKE LOCK & GRAPHICS ═══════════════════ */
@@ -1047,7 +1040,7 @@ function renderPlaylist() {
     if(ex.type==='counted'){
       grid.appendChild(mField('Sets',()=>mNumInp(ex.sets,1,20,v=>{ex.sets=v;saveEx();renderPlaylist();})));
       grid.appendChild(mField('Reps',()=>mNumInp(ex.reps,1,50,v=>{ex.reps=v;saveEx();renderPlaylist();})));
-      
+
       const rF=document.createElement('div'); rF.className='field';
       const rL=document.createElement('label'); rL.textContent='Rest (s)'; rF.appendChild(rL);
       const rRow=document.createElement('div'); rRow.className='time-row';
