@@ -51,7 +51,7 @@
   h1 { font-size: 1.35rem; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
   .sub { color: var(--muted); font-size: .8rem; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
 
-  /* ── 60% Media Display vs 40% Workout Routine ── */
+  /* ── Split Layout: 60% Left Media, 40% Right Timer/Playlist ── */
   .layout-grid {
     display: grid;
     grid-template-columns: 1.4fr 1fr;
@@ -60,7 +60,6 @@
     min-height: 0;
   }
 
-  /* ── Left Column: Media Station ── */
   .left-col {
     display: flex;
     flex-direction: column;
@@ -154,7 +153,6 @@
     object-fit: cover;
   }
 
-  /* Soundscape Selector */
   .sound-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -165,17 +163,17 @@
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid var(--glass-border);
     border-radius: 11px;
-    padding: 12px;
+    padding: 14px;
     text-align: center;
     cursor: pointer;
     transition: background .2s, border-color .2s;
   }
   .sound-card:hover { background: rgba(255, 255, 255, 0.15); }
   .sound-card.active { background: var(--col-rest); border-color: #8edaa5; }
-  .sound-card span { display: block; font-size: 1.2rem; margin-bottom: 4px; }
-  .sound-card small { font-size: .75rem; font-weight: 600; }
+  .sound-card span { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+  .sound-card small { font-size: .78rem; font-weight: 600; }
 
-  /* ── Right Column: Timer & Sequence ── */
+  /* ── Right Column: Timer & Playlist ── */
   .right-col {
     display: flex;
     flex-direction: column;
@@ -214,13 +212,14 @@
   }
   .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
   button.ctrl {
-    border: 1px solid var(--glass-border-light); border-radius: 9px; padding: 7px 13px;
-    font-size: .8rem; font-weight: 700; cursor: pointer;
+    border: 1px solid var(--glass-border-light); border-radius: 9px; padding: 7px 11px;
+    font-size: .78rem; font-weight: 700; cursor: pointer;
     background: rgba(255,255,255,0.12); color: var(--text);
   }
   button.ctrl:hover { background: rgba(255,255,255,0.22); }
   button.ctrl.primary { background: var(--col-active); border-color: rgba(255,255,255,0.3); }
   button.ctrl.danger  { background: rgba(144, 48, 16, 0.7); }
+  button.ctrl.pause-all { background: #b8600a; border-color: #f7a261; }
   button:disabled { opacity: .35; cursor: not-allowed; }
 
   /* Playlist */
@@ -308,7 +307,7 @@
   <header>
     <div>
       <h1>🩹 Physio Workout Suite</h1>
-      <div class="sub">Widescreen Totoro Edition · Local Safe Mode Enabled</div>
+      <div class="sub">Widescreen Edition · Independent Media & Timer Controls</div>
     </div>
   </header>
 
@@ -317,19 +316,19 @@
     <div class="left-col">
       <div class="media-panel">
         <div class="tab-bar">
-          <button class="tab-btn active" data-tab="tab-yt">📺 YouTube Video</button>
+          <button class="tab-btn active" data-tab="tab-yt">📺 YouTube Video / Search</button>
           <button class="tab-btn" data-tab="tab-audio">🌿 Nature Sounds</button>
           <button class="tab-btn" data-tab="tab-local">📁 Local Media</button>
         </div>
 
-        <!-- Tab 1: YouTube -->
+        <!-- Tab 1: YouTube Search & Player -->
         <div class="tab-content active" id="tab-yt">
           <div class="search-row">
-            <input type="text" class="media-inp" id="ytInp" placeholder="Paste YouTube Link or Video ID (e.g. jfKfPfyJRdk)">
-            <button class="btn-action" id="btnLoadYt">Load</button>
+            <input type="text" class="media-inp" id="ytInp" placeholder="Enter link or search term (e.g. momomi, lofi, stretching)">
+            <button class="btn-action" id="btnLoadYt">Load / Search</button>
           </div>
           <div class="video-viewport">
-            <iframe id="ytFrame" src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?enablejsapi=1&rel=0&modestbranding=1" allow="autoplay; fullscreen"></iframe>
+            <iframe id="ytFrame" src="https://www.youtube-nocookie.com/embed?listType=search&list=lofi+workout+ambient&enablejsapi=1" allow="autoplay; fullscreen; encrypted-media"></iframe>
           </div>
         </div>
 
@@ -337,25 +336,25 @@
         <div class="tab-content" id="tab-audio">
           <div class="sound-grid">
             <div class="sound-card active" data-src="">
-              <span>🔇</span><small>Off</small>
+              <span>🔇</span><small>Mute</small>
             </div>
-            <div class="sound-card" data-src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg">
-              <span>🌧️</span><small>Heavy Rain</small>
+            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=rain-and-thunder-nature-sounds-7803.mp3">
+              <span>🌧️</span><small>Rain & Thunder</small>
             </div>
-            <div class="sound-card" data-src="https://actions.google.com/sounds/v1/ambiences/forest_day.ogg">
+            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_849646b986.mp3?filename=forest-birds-chirping-nature-sounds-7798.mp3">
               <span>🌲</span><small>Forest Birds</small>
             </div>
-            <div class="sound-card" data-src="https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg">
+            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c770c89a.mp3?filename=ocean-waves-ambient-relaxing-sound-10940.mp3">
               <span>🌊</span><small>Ocean Waves</small>
             </div>
-            <div class="sound-card" data-src="https://actions.google.com/sounds/v1/ambiences/campfire.ogg">
+            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=crackling-fireplace-nature-sounds-8012.mp3">
               <span>🔥</span><small>Campfire</small>
             </div>
-            <div class="sound-card" data-src="https://actions.google.com/sounds/v1/weather/distant_thunder_rain.ogg">
-              <span>⚡</span><small>Thunderstorm</small>
+            <div class="sound-card" data-src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=soft-rain-ambient-111154.mp3">
+              <span>💧</span><small>Gentle Rain</small>
             </div>
           </div>
-          <audio id="ambientAudio" loop></audio>
+          <audio id="ambientAudio" loop crossorigin="anonymous"></audio>
         </div>
 
         <!-- Tab 3: Local File -->
@@ -370,7 +369,7 @@
       </div>
     </div>
 
-    <!-- Right Column: Timer & Playlist -->
+    <!-- Right Column: Timer & Routine -->
     <div class="right-col">
       <div class="stage">
         <div class="circle-wrap">
@@ -389,6 +388,7 @@
           <div class="btn-row">
             <button class="ctrl primary" id="btnStart">▶ Start</button>
             <button class="ctrl" id="btnPause" disabled>⏸ Pause</button>
+            <button class="ctrl pause-all" id="btnPauseAll">⏸ Pause All</button>
             <button class="ctrl" id="btnSkip" disabled>⏭ Skip</button>
             <button class="ctrl danger" id="btnReset">↺</button>
           </div>
@@ -407,12 +407,12 @@
     </div>
   </div>
 
-  <footer>Synchronized routine sequencer · Wake Lock keep-screen active</footer>
+  <footer>Independent Audio/Video streams · Master Pause Available</footer>
 </div>
 
 <script>
 /* ═══════════════════ DATA & STORAGE ═══════════════════ */
-const STORAGE_KEY = 'physio_suite_v1';
+const STORAGE_KEY = 'physio_suite_v3';
 const CIRC = 2 * Math.PI * 86;
 
 const DEFAULT_EXERCISES = [
@@ -453,7 +453,8 @@ const el={
   fg:$('fgCircle'), btnStart:$('btnStart'), btnPause:$('btnPause'),
   btnSkip:$('btnSkip'), btnReset:$('btnReset'), playlist:$('playlist'),
   ytFrame:$('ytFrame'), ytInp:$('ytInp'), btnLoadYt:$('btnLoadYt'),
-  ambientAudio:$('ambientAudio'), localVideo:$('localVideo'), localFileInput:$('localFileInput')
+  ambientAudio:$('ambientAudio'), localVideo:$('localVideo'), localFileInput:$('localFileInput'),
+  btnPauseAll:$('btnPauseAll')
 };
 
 /* ═══════════════════ TAB SWITCHING ═══════════════════ */
@@ -466,23 +467,27 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-/* ═══════════════════ MEDIA CONTROLS ═══════════════════ */
-function extractYtId(url) {
-  const clean = url.trim();
-  if (/^[a-zA-Z0-9_-]{11}$/.test(clean)) return clean;
-  const match = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
-  return match ? match[1] : null;
+/* ═══════════════════ YOUTUBE & AUDIO ENGINE ═══════════════════ */
+function loadMediaContent() {
+  const input = el.ytInp.value.trim();
+  if (!input) return;
+
+  // Direct ID check
+  const idMatch = input.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+  const videoId = idMatch ? idMatch[1] : (/^[a-zA-Z0-9_-]{11}$/.test(input) ? input : null);
+
+  if (videoId) {
+    el.ytFrame.src = `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&autoplay=1&rel=0&modestbranding=1`;
+  } else {
+    // If user types general keywords like "momomi", embed YouTube's official search feed
+    el.ytFrame.src = `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(input)}&enablejsapi=1&autoplay=1`;
+  }
 }
 
-el.btnLoadYt.addEventListener('click', () => {
-  const id = extractYtId(el.ytInp.value);
-  if (id) {
-    el.ytFrame.src = `https://www.youtube-nocookie.com/embed/${id}?enablejsapi=1&autoplay=1&rel=0&modestbranding=1`;
-  } else {
-    alert("Please enter a valid YouTube link or 11-digit video ID.");
-  }
-});
+el.btnLoadYt.addEventListener('click', loadMediaContent);
+el.ytInp.addEventListener('keydown', e => { if (e.key === 'Enter') loadMediaContent(); });
 
+// Ambient sound switcher
 document.querySelectorAll('.sound-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.sound-card').forEach(c => c.classList.remove('active'));
@@ -490,7 +495,7 @@ document.querySelectorAll('.sound-card').forEach(card => {
     const src = card.dataset.src;
     if (src) {
       el.ambientAudio.src = src;
-      el.ambientAudio.play().catch(()=>{});
+      el.ambientAudio.play().catch(e => console.warn("Audio waiting for user gesture", e));
     } else {
       el.ambientAudio.pause();
       el.ambientAudio.src = '';
@@ -498,6 +503,7 @@ document.querySelectorAll('.sound-card').forEach(card => {
   });
 });
 
+// Local file preview
 el.localFileInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (file) {
@@ -506,21 +512,23 @@ el.localFileInput.addEventListener('change', (e) => {
   }
 });
 
-function syncMediaPlay() {
-  if (el.ambientAudio.src) el.ambientAudio.play().catch(()=>{});
-  if (el.localVideo.src) el.localVideo.play().catch(()=>{});
-  try {
-    el.ytFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-  } catch(e){}
-}
-
-function syncMediaPause() {
-  if (el.ambientAudio.src) el.ambientAudio.pause();
-  if (el.localVideo.src) el.localVideo.pause();
+/* ═══════════════════ MASTER PAUSE ALL ═══════════════════ */
+el.btnPauseAll.addEventListener('click', () => {
+  // 1. Pause workout timer
+  if (running && !paused) {
+    paused = true;
+    el.btnPause.textContent = '▶ Resume';
+    speak('All paused.');
+  }
+  // 2. Pause ambient sound
+  if (el.ambientAudio) el.ambientAudio.pause();
+  // 3. Pause local media
+  if (el.localVideo) el.localVideo.pause();
+  // 4. Pause YouTube embed
   try {
     el.ytFrame.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
   } catch(e){}
-}
+});
 
 /* ═══════════════════ WAKE LOCK & GRAPHICS ═══════════════════ */
 async function acquireWakeLock() {
@@ -689,7 +697,6 @@ async function runCounted(ex, token) {
 async function startWorkout() {
   if (running) return;
   await acquireWakeLock();
-  syncMediaPlay();
 
   running=true; paused=false; stopReq=false; skipReq=false;
   runToken++;
@@ -748,10 +755,8 @@ function pauseResume() {
   if (paused) {
     try { window.speechSynthesis.cancel(); } catch(e){}
     speak('Paused.');
-    syncMediaPause();
   } else {
     speak('Resuming.');
-    syncMediaPlay();
   }
 }
 
@@ -768,7 +773,6 @@ function resetAll() {
   paused = false;
   runToken++;
   endSession();
-  syncMediaPause();
   el.title.textContent = 'Ready';
   el.phase.textContent = 'Tap Start';
   el.bignum.textContent = '--';
